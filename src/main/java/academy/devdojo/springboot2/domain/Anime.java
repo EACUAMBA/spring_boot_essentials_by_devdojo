@@ -1,10 +1,7 @@
 package academy.devdojo.springboot2.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +16,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Anime {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)

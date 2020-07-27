@@ -69,6 +69,6 @@ public class AnimeController {
     @PutMapping
     public ResponseEntity<Void> update(@RequestBody Anime anime){
         animeService.update(anime);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

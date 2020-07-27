@@ -17,9 +17,13 @@ import java.util.List;
 public class SpringClient {
     public static void main(String[] args) {
         RestTemplate restTemplate = new RestTemplate();
-        postRestTemplateExchange(restTemplate);
+        putRestTemplateExchange(restTemplate);
     }
-
+    private static void putRestTemplateExchange(RestTemplate restTemplate){
+        Anime animeToPut = Anime.builder().id(2).name("Naruto").url("http://narutoTV.jp").build();
+        ResponseEntity<Void> voidResponseEntity = restTemplate.exchange("http://localhost:8080/animes", HttpMethod.PUT, new HttpEntity<>(animeToPut), Void.class);
+        log.info("The status of the request is: " + voidResponseEntity.getStatusCode().value());
+    }
     private static void postRestTemplateExchange(RestTemplate restTemplate) {
         Anime animeToPost = Anime.builder().name("Suzuki").url("http://suzukiTV.org").build();
         HttpHeaders httpHeaders = new HttpHeaders();

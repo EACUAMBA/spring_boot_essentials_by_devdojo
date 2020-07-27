@@ -17,7 +17,11 @@ import java.util.List;
 public class SpringClient {
     public static void main(String[] args) {
         RestTemplate restTemplate = new RestTemplate();
-        putRestTemplateExchange(restTemplate);
+        deleteRestTemplateExchange(restTemplate);
+    }
+    private  static void deleteRestTemplateExchange(RestTemplate restTemplate){
+        ResponseEntity<Void> voidResponseEntity = restTemplate.exchange("http://localhost:8080/animes/{id}", HttpMethod.DELETE, null, Void.class, new Integer(5));
+        log.info("The status of the delete is: {}", voidResponseEntity);
     }
     private static void putRestTemplateExchange(RestTemplate restTemplate){
         Anime animeToPut = Anime.builder().id(2).name("Naruto").url("http://narutoTV.jp").build();

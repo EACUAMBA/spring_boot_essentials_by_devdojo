@@ -27,4 +27,13 @@ public class Anime {
     @URL(message = "Please put a valid URL!")
     @NotEmpty(message = "The URL can't be empty!")
     private String url;
+
+    @Override
+    public String toString() {
+        return "Anime{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

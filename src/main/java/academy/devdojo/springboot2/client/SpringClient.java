@@ -31,7 +31,8 @@ public class SpringClient {
     private static void postRestTemplateExchange(RestTemplate restTemplate) {
         Anime animeToPost = Anime.builder().name("Suzuki").url("http://suzukiTV.org").build();
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);;
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
         ResponseEntity<Anime> animePosted = restTemplate.exchange("http://localhost:8080/animes/", HttpMethod.POST, new HttpEntity<>(animeToPost, httpHeaders), Anime.class);
         log.info("The anime posted is: {}", animePosted);
     }

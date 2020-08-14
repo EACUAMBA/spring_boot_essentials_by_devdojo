@@ -12,6 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.AuthenticatedPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,8 +41,9 @@ public class AnimeController {
 //    }
 
     @GetMapping()
-    public ResponseEntity<Page<Anime>> listAll(Pageable pageable){
+    public ResponseEntity<Page<Anime>> listAll(Pageable pageable, @AuthenticationPrincipal UserDetails userDetaisl){
         log.info("Date Formatted {}", utils.formatLocalDateTimeToDateBaseStyle(LocalDateTime.now()));
+        log.info("User Details: {}",userDetaisl);
         return ResponseEntity.ok(animeService.listAll(pageable));
 //        return new ResponseEntity<>(animeRepository.listAll(), HttpStatus.NOT_FOUND);
     }
@@ -61,7 +66,9 @@ public class AnimeController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id){
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable int id ,@AuthenticationPrincipal UserDetails userDetaisl){
+        log.info("User Details: {}",userDetaisl);
         animeService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

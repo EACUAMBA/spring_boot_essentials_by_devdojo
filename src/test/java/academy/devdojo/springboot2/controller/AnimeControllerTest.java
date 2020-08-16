@@ -55,7 +55,7 @@ class AnimeControllerTest {
     public void listAll_ReturnListOfAnimeInsidePageObject_WhenSuccessful() {
         String expectedName = AnimeCreator.createAnimeToBeSaved().getName();
 
-        Page<Anime> animePage = this.animeController.listAll(null, null).getBody();
+        Page<Anime> animePage = this.animeController.listAll(null,null).getBody();
 
         Assertions.assertThat(animePage).isNotNull();
         Assertions.assertThat(animePage.toList()).isNotEmpty();

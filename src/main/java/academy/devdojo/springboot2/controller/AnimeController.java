@@ -60,20 +60,19 @@ public class AnimeController {
         return ResponseEntity.ok(animeService.findByName(name));
     }
 
-    @PostMapping
+    @PostMapping(path = "/admin")
     public ResponseEntity<Anime> save(@RequestBody @Valid Anime anime){
         return ResponseEntity.ok(animeService.save(anime));
     }
 
-    @DeleteMapping(path = "/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "/admin/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id ,@AuthenticationPrincipal UserDetails userDetaisl){
         log.info("User Details: {}",userDetaisl);
         animeService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping
+    @PutMapping(path = "/admin")
     public ResponseEntity<Void> update(@RequestBody Anime anime){
         animeService.update(anime);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

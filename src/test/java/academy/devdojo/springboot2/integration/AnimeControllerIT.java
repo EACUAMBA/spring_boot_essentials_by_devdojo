@@ -16,29 +16,68 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 
-import javax.swing.*;
-import java.awt.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AnimeControllerIT {
 
+
+//    @LocalServerPort
+//    private int port;
+
     @Autowired
-    private TestRestTemplate testRestTemplate;
+    @Qualifier(value = "testRestTemplateRoleUser")
+    private TestRestTemplate testRestTemplateRoleUser;
+
+    @Autowired
+    @Qualifier(value = "testRestTemplateRoleAdmin")
+    private TestRestTemplate testRestTemplateRoleAdmin;
+
+
 
     @MockBean
     private AnimeRepository animeRepository;
+
+    @Lazy
+    @TestConfiguration
+    static class Config{
+
+        @Bean(name = "testRestTemplateRoleUser")
+        public TestRestTemplate testRestTemplateUserCreator(@Value("${local.server.port}") int port){
+            RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
+                    .rootUri("http://localhost:" + port)
+                    .basicAuthentication("devdojo", "12345");
+            return new TestRestTemplate(restTemplateBuilder);
+        }
+
+        @Bean(name = "testRestTemplateRoleAdmin")
+        public TestRestTemplate testRestTemplateAdminCreator(@Value("${local.server.port}") int port){
+            RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
+                    .rootUri("http://localhost:" + port)
+                    .basicAuthentication("eac", "12345");
+            return new TestRestTemplate(restTemplateBuilder);
+        }
+    }
 
     @BeforeEach
     public void setUp() {
@@ -62,7 +101,7 @@ public class AnimeControllerIT {
     public void listAll_ReturnListOfAnimeInsidePageObject_WhenSuccessful() {
         String expectedName = AnimeCreator.createAnimeToBeSaved().getName();
 
-        Page<Anime> animePage = this.testRestTemplate.exchange("/animes", HttpMethod.GET, null, new ParameterizedTypeReference<PageableResponse<Anime>>() {}).getBody();
+        Page<Anime> animePage = this.testRestTemplateRoleUser.exchange("/animes", HttpMethod.GET, null, new ParameterizedTypeReference<PageableResponse<Anime>>() {}).getBody();
 
         Assertions.assertThat(animePage).isNotNull();
         Assertions.assertThat(animePage.toList()).isNotEmpty();
@@ -75,7 +114,7 @@ public class AnimeControllerIT {
     public void findByID_ReturnAnAnimeObject_WhenSuccessful() {
         Integer expectedID = AnimeCreator.createValidAnime().getId();
 
-        Anime animeReturned = this.testRestTemplate.exchange("/animes/1", HttpMethod.GET, null, new ParameterizedTypeReference<Anime>() {}).getBody();
+        Anime animeReturned = this.testRestTemplateRoleUser.exchange("/animes/1", HttpMethod.GET, null, new ParameterizedTypeReference<Anime>() {}).getBody();
 
         Assertions.assertThat(animeReturned).isNotNull();
         Assertions.assertThat(animeReturned.getName()).isNotEmpty();
@@ -88,7 +127,7 @@ public class AnimeControllerIT {
     public void findByName_ReturnAListOfAnimeObject_WhenSuccessful() {
         String expectedName = AnimeCreator.createValidAnime().getName();
 
-        List<Anime> animesReturned = this.testRestTemplate.exchange("/animes/find?name='dgb'", HttpMethod.GET, null, new ParameterizedTypeReference<List<Anime>>() {
+        List<Anime> animesReturned = this.testRestTemplateRoleUser.exchange("/animes/find?name='dgb'", HttpMethod.GET, null, new ParameterizedTypeReference<List<Anime>>() {
         }).getBody();
 
         Assertions.assertThat(animesReturned).isNotNull();
@@ -105,7 +144,7 @@ public class AnimeControllerIT {
 
         Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
 
-        Anime animeReturned = this.testRestTemplate.exchange("/animes", HttpMethod.POST, getHttpEntityJson(animeToBeSaved), Anime.class).getBody();
+        Anime animeReturned = this.testRestTemplateRoleAdmin.exchange("/animes/admin", HttpMethod.POST, getHttpEntityJson(animeToBeSaved), Anime.class).getBody();
 
         Assertions.assertThat(animeReturned).isNotNull();
         Assertions.assertThat(animeReturned.getName()).isNotEmpty();
@@ -116,7 +155,7 @@ public class AnimeControllerIT {
     @Test
     @DisplayName("delete remove an Anime when successful")
     public void delete_RemoveAnAnimeObject_WhenSuccessful() {
-        ResponseEntity<Void> voidResponseEntity = this.testRestTemplate.exchange("/animes/1", HttpMethod.DELETE, null, Void.class);
+        ResponseEntity<Void> voidResponseEntity = this.testRestTemplateRoleAdmin.exchange("/animes/admin/1", HttpMethod.DELETE, null, Void.class);
 
         Assertions.assertThat(voidResponseEntity).isNotNull();
         Assertions.assertThat(voidResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
@@ -129,7 +168,7 @@ public class AnimeControllerIT {
     public void save_UpdatedAnimeAndReturnAnAnimeObject_WhenSuccessful() {
         Anime validUpdatedAnime = AnimeCreator.createValidUpdatedAnime();
 
-        ResponseEntity<Void> voidResponseEntity = this.testRestTemplate.exchange("/animes", HttpMethod.PUT, new HttpEntity<>(validUpdatedAnime), Void.class);
+        ResponseEntity<Void> voidResponseEntity = this.testRestTemplateRoleAdmin.exchange("/animes/admin", HttpMethod.PUT, new HttpEntity<>(validUpdatedAnime), Void.class);
 
         Assertions.assertThat(voidResponseEntity).isNotNull();
         Assertions.assertThat(voidResponseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);

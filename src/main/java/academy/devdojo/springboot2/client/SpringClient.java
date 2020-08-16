@@ -4,6 +4,7 @@ import academy.devdojo.springboot2.domain.Anime;
 import academy.devdojo.springboot2.wrapper.PageableResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
@@ -17,10 +18,10 @@ import java.util.List;
 public class SpringClient {
     public static void main(String[] args) {
         RestTemplate restTemplate = new RestTemplate();
-        deleteRestTemplateExchange(restTemplate);
+        postRestTemplateExchange(restTemplate);
     }
     private  static void deleteRestTemplateExchange(RestTemplate restTemplate){
-        ResponseEntity<Void> voidResponseEntity = restTemplate.exchange("http://localhost:8080/animes/{id}", HttpMethod.DELETE, null, Void.class, new Integer(5));
+        ResponseEntity<Void> voidResponseEntity = restTemplate.exchange("http://localhost:8080/animes/{id}", HttpMethod.DELETE, null, Void.class, 5);
         log.info("The status of the delete is: {}", voidResponseEntity);
     }
     private static void putRestTemplateExchange(RestTemplate restTemplate){
@@ -32,8 +33,10 @@ public class SpringClient {
         Anime animeToPost = Anime.builder().name("Suzuki").url("http://suzukiTV.org").build();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.setBasicAuth("eac", "12345");
 
-        ResponseEntity<Anime> animePosted = restTemplate.exchange("http://localhost:8080/animes/", HttpMethod.POST, new HttpEntity<>(animeToPost, httpHeaders), Anime.class);
+
+        ResponseEntity<Anime> animePosted = restTemplate.exchange("http://localhost:8080/animes/admin/", HttpMethod.POST, new HttpEntity<>(animeToPost, httpHeaders), Anime.class);
         log.info("The anime posted is: {}", animePosted);
     }
 
